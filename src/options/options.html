@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ClauseGuard Options</title>
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <div class="options-container">
+    <!-- Header -->
+    <header class="options-header">
+      <div class="header-content">
+        <div class="header-left">
+          <span class="logo-icon">🛡️</span>
+          <h1 class="logo-text">ClauseGuard</h1>
+        </div>
+        <span class="header-subtitle">Settings</span>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="options-main">
+      <!-- General Settings -->
+      <section class="settings-section">
+        <h2 class="section-title">General Settings</h2>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <label class="setting-label">Enable ClauseGuard</label>
+            <p class="setting-description">Turn the extension on or off globally</p>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" id="setting-enabled" checked>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <label class="setting-label">Only scan legal pages</label>
+            <p class="setting-description">Automatically detect and scan only Terms, Privacy Policy, and similar pages</p>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" id="setting-only-legal" checked>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <label class="setting-label">Sensitivity</label>
+            <p class="setting-description">Controls how aggressively issues are flagged</p>
+          </div>
+          <select id="setting-sensitivity" class="select-input">
+            <option value="strict">Strict (More sensitive)</option>
+            <option value="normal" selected>Normal</option>
+            <option value="lenient">Lenient (Less sensitive)</option>
+          </select>
+        </div>
+      </section>
+
+      <!-- Highlight Colors -->
+      <section class="settings-section">
+        <h2 class="section-title">Highlight Colors</h2>
+        <p class="section-description">Customize the highlight color for each category</p>
+
+        <div class="color-grid">
+          <div class="color-item">
+            <label class="color-label">⚖️ Arbitration</label>
+            <input type="color" id="color-arbitration" value="#ff6b6b" class="color-input">
+          </div>
+          <div class="color-item">
+            <label class="color-label">💳 Auto-Renewal</label>
+            <input type="color" id="color-auto-renew" value="#ffa94d" class="color-input">
+          </div>
+          <div class="color-item">
+            <label class="color-label">📤 Data Sharing</label>
+            <input type="color" id="color-data-sharing" value="#ff8787" class="color-input">
+          </div>
+          <div class="color-item">
+            <label class="color-label">💾 Data Retention</label>
+            <input type="color" id="color-data-retention" value="#ffd43b" class="color-input">
+          </div>
+          <div class="color-item">
+            <label class="color-label">📝 Unilateral Changes</label>
+            <input type="color" id="color-unilateral-changes" value="#69db7c" class="color-input">
+          </div>
+          <div class="color-item">
+            <label class="color-label">🛡️ Liability</label>
+            <input type="color" id="color-liability" value="#74c0fc" class="color-input">
+          </div>
+          <div class="color-item">
+            <label class="color-label">🏛️ Governing Law</label>
+            <input type="color" id="color-governing-law" value="#b197fc" class="color-input">
+          </div>
+        </div>
+
+        <button id="reset-colors" class="btn btn-secondary">Reset to Defaults</button>
+      </section>
+
+      <!-- Domain Lists -->
+      <section class="settings-section">
+        <h2 class="section-title">Domain Settings</h2>
+
+        <div class="domain-list-section">
+          <h3 class="subsection-title">Allowlist</h3>
+          <p class="setting-description">Always scan pages on these domains (even when "only legal pages" is enabled)</p>
+          <div class="domain-list" id="allowlist">
+            <!-- Domain items will be inserted here -->
+          </div>
+          <div class="domain-input-row">
+            <input type="text" id="allowlist-input" class="text-input" placeholder="e.g., example.com or *.example.com">
+            <button id="allowlist-add" class="btn btn-small">Add</button>
+          </div>
+        </div>
+
+        <div class="domain-list-section">
+          <h3 class="subsection-title">Denylist</h3>
+          <p class="setting-description">Never scan pages on these domains</p>
+          <div class="domain-list" id="denylist">
+            <!-- Domain items will be inserted here -->
+          </div>
+          <div class="domain-input-row">
+            <input type="text" id="denylist-input" class="text-input" placeholder="e.g., example.com or *.example.com">
+            <button id="denylist-add" class="btn btn-small">Add</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Privacy Info -->
+      <section class="settings-section">
+        <h2 class="section-title">Privacy</h2>
+        <div class="info-box">
+          <p><strong>ClauseGuard respects your privacy:</strong></p>
+          <ul>
+            <li>✓ All scanning happens locally in your browser</li>
+            <li>✓ No data is ever sent to external servers</li>
+            <li>✓ No analytics or tracking</li>
+            <li>✓ No third-party services</li>
+            <li>✓ Settings sync only via Chrome's built-in sync (if enabled)</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- About -->
+      <section class="settings-section">
+        <h2 class="section-title">About</h2>
+        <p class="about-text">
+          ClauseGuard v1.0.0<br>
+          Helps you understand Terms of Service and Privacy Policies by highlighting potentially concerning clauses.
+        </p>
+      </section>
+    </main>
+
+    <!-- Status Toast -->
+    <div id="toast" class="toast">
+      <span class="toast-icon">✓</span>
+      <span class="toast-message">Settings saved</span>
+    </div>
+  </div>
+
+  <script src="options.js"></script>
+</body>
+</html>

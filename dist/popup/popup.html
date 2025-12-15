@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ClauseGuard</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="popup-container">
+    <!-- Header -->
+    <header class="popup-header">
+      <div class="header-left">
+        <span class="logo-icon">🛡️</span>
+        <span class="logo-text">ClauseGuard</span>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="popup-main">
+      <!-- Status Section -->
+      <section class="status-section" id="status-section">
+        <div class="status-loading">
+          <div class="spinner"></div>
+          <span>Loading...</span>
+        </div>
+      </section>
+
+      <!-- Domain Toggle -->
+      <section class="domain-section" id="domain-section" style="display: none;">
+        <div class="domain-header">
+          <span class="domain-label">Enable on</span>
+          <span class="domain-name" id="domain-name">example.com</span>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="domain-toggle" checked>
+          <span class="toggle-slider"></span>
+        </label>
+      </section>
+
+      <!-- Scan Button -->
+      <section class="action-section">
+        <button class="btn btn-primary" id="scan-btn">
+          <span class="btn-icon">🔍</span>
+          Scan This Page
+        </button>
+      </section>
+
+      <!-- Results Summary -->
+      <section class="results-section" id="results-section" style="display: none;">
+        <div class="results-header">
+          <span class="results-title">Last Scan Results</span>
+          <span class="risk-badge" id="risk-badge">LOW</span>
+        </div>
+        <div class="results-counts" id="results-counts">
+          <!-- Counts will be inserted here -->
+        </div>
+      </section>
+
+      <!-- Legal Page Indicator -->
+      <section class="legal-indicator" id="legal-indicator" style="display: none;">
+        <span class="legal-icon">📄</span>
+        <span class="legal-text">Detected as legal page</span>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="popup-footer">
+      <a href="#" id="options-link" class="footer-link">
+        <span class="link-icon">⚙️</span>
+        Options
+      </a>
+      <span class="footer-divider">•</span>
+      <span class="footer-version">v1.0.0</span>
+    </footer>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

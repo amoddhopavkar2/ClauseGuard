@@ -1,0 +1,80 @@
+/**
+ * ClauseGuard Content Script Styles
+ * Styles for inline highlights
+ */
+
+/* Highlight base styles */
+.cg-highlight {
+  padding: 0 2px;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.cg-highlight:hover {
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
+}
+
+/* Active/flashing highlight */
+.cg-highlight-active {
+  animation: cg-flash 2s ease-out;
+}
+
+@keyframes cg-flash {
+  0%, 20% {
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.6);
+  }
+  100% {
+    box-shadow: none;
+  }
+}
+
+/* Category-specific colors (can be overridden by inline styles) */
+.cg-cat-arbitration {
+  background-color: #ff6b6b !important;
+  color: #000 !important;
+}
+
+.cg-cat-auto-renew {
+  background-color: #ffa94d !important;
+  color: #000 !important;
+}
+
+.cg-cat-data-sharing {
+  background-color: #ff8787 !important;
+  color: #000 !important;
+}
+
+.cg-cat-data-retention {
+  background-color: #ffd43b !important;
+  color: #000 !important;
+}
+
+.cg-cat-unilateral-changes {
+  background-color: #69db7c !important;
+  color: #000 !important;
+}
+
+.cg-cat-liability {
+  background-color: #74c0fc !important;
+  color: #000 !important;
+}
+
+.cg-cat-governing-law {
+  background-color: #b197fc !important;
+  color: #000 !important;
+}
+
+/* Ensure highlights are visible regardless of page theme */
+.cg-highlight {
+  -webkit-text-fill-color: inherit;
+  text-decoration: none !important;
+}
+
+/* Dark mode adjustments */
+@media (prefers-color-scheme: dark) {
+  .cg-highlight {
+    color: #1a1a1a !important;
+    -webkit-text-fill-color: #1a1a1a !important;
+  }
+}
