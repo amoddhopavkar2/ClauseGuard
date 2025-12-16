@@ -1,8 +1,9 @@
 {
   "manifest_version": 3,
-  "name": "ClauseGuard",
+  "name": "ClauseGuard - Terms & Privacy Scanner",
   "version": "1.0.0",
-  "description": "Detects and highlights risky clauses in Terms of Service and Privacy Policy pages. Works fully offline, no data collection.",
+  "description": "Detects and highlights risky clauses in Terms of Service and Privacy Policy pages. Works fully offline with no data collection.",
+  "homepage_url": "https://github.com/amoddhopavkar2/ClauseGuard",
   "icons": {
     "16": "assets/icon16.png",
     "48": "assets/icon48.png",
@@ -18,7 +19,7 @@
       "16": "assets/icon16.png",
       "48": "assets/icon48.png"
     },
-    "default_title": "ClauseGuard - Clause Risk Scanner"
+    "default_title": "ClauseGuard - Scan for Risky Clauses"
   },
   "background": {
     "service_worker": "background/serviceWorker.js",

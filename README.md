@@ -1,192 +1,251 @@
 # ClauseGuard
 
-A Chrome Extension (Manifest V3) that detects and highlights risky clauses in Terms of Service and Privacy Policy pages. Works fully offline with no data collection.
+A Chrome Extension that detects and highlights risky clauses in Terms of Service and Privacy Policy pages. Works fully offline with no data collection.
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Chrome Web Store](https://img.shields.io/badge/Chrome-Web%20Store-green.svg)](#installation)
+[![Manifest V3](https://img.shields.io/badge/Manifest-V3-orange.svg)](src/manifest.json)
+
+## What It Does
+
+ClauseGuard helps you understand legal documents by:
+- **Highlighting risky clauses** directly in the page text
+- **Showing a risk summary panel** with severity levels (Low/Medium/High)
+- **Categorizing issues** across 7 key areas of concern
+- **Providing excerpts** you can click to jump to the highlighted text
+
+![Screenshot placeholder - Panel showing risk summary](docs/screenshots/panel-light.png)
+![Screenshot placeholder - Highlighted text on page](docs/screenshots/highlights.png)
 
 ## Features
 
-- **Automatic Detection**: Identifies likely legal pages (Terms, Privacy Policy, etc.) based on URL and page content
-- **Clause Scanning**: Detects potentially concerning clauses across 7 categories:
-  - Arbitration / Waiver (high risk)
-  - Auto-Renewal / Billing (high risk)
-  - Data Sharing / Selling (high risk)
-  - Data Retention (medium-high risk)
-  - Unilateral Changes (medium risk)
-  - Liability Limitation (medium risk)
-  - Governing Law / Venue (low-medium risk)
-- **Visual Highlighting**: Matched clauses are highlighted inline with category-specific colors
-- **Risk Summary Panel**: Floating side panel showing:
-  - Overall risk level (Low / Medium / High)
-  - Issue counts by category
-  - Clickable excerpts that scroll to highlights
-- **Customizable**: Configure highlight colors, sensitivity levels, and domain allow/deny lists
+- **Automatic Detection**: Identifies legal pages based on URL and content
+- **7 Risk Categories**:
+  - Arbitration / Class Action Waivers (High Risk)
+  - Auto-Renewal / Billing (High Risk)
+  - Data Sharing / Selling (High Risk)
+  - Data Retention (Medium-High Risk)
+  - Unilateral Changes (Medium Risk)
+  - Liability Limitation (Medium Risk)
+  - Governing Law / Venue (Low-Medium Risk)
+- **Visual Highlighting**: Color-coded highlights with customizable colors
+- **Risk Scoring**: Weighted pattern matching with configurable sensitivity
+- **Dark Mode**: System, Light, or Dark theme with live switching
 - **SPA Support**: Detects navigation changes and rescans automatically
 
-## Privacy Guarantees
+## How It Works
 
-ClauseGuard is designed with privacy as a core principle:
+1. **Page Detection**: When you visit a page, ClauseGuard checks if it's likely a legal document (Terms, Privacy Policy, etc.) based on URL keywords and page title
+2. **Pattern Matching**: The page text is scanned against 40+ regex patterns that detect concerning legal language
+3. **Scoring**: Each match is weighted by severity. Critical patterns (like binding arbitration + class action waiver) can instantly trigger a High Risk rating
+4. **Display**: Matched text is highlighted inline, and a summary panel appears showing all findings
 
-- **100% Offline**: All scanning and analysis happens locally in your browser
-- **No Network Requests**: The extension makes zero network calls
+All processing happens **locally in your browser**. No data is ever sent anywhere.
+
+## Privacy
+
+**ClauseGuard is a privacy-first extension:**
+
+- **100% Offline**: All scanning and analysis happens locally
+- **No Network Requests**: Zero external connections
 - **No Data Collection**: No analytics, tracking, or telemetry
-- **No External Services**: No third-party APIs or services
-- **Local Storage Only**: Settings sync via Chrome's built-in sync (if enabled) or local storage
+- **No External Services**: No third-party APIs
+- **Local Storage Only**: Settings sync via Chrome's built-in storage
 
-## Scoring Algorithm
+See [PRIVACY.md](PRIVACY.md) for the full privacy policy.
 
-### Pattern Weights
+## Permissions Explained
 
-Each detected pattern has an assigned weight based on its potential impact:
-- **Critical patterns** (weight 9-10): Binding arbitration, class action waivers, jury trial waivers, selling personal data
-- **High severity** (weight 6-8): Auto-renewal, data sharing with third parties, retention policies
-- **Medium severity** (weight 4-5): Unilateral changes, liability limits, indemnification
-- **Low severity** (weight 2-3): Governing law, venue specifications
+| Permission | Why It's Needed |
+|------------|-----------------|
+| `storage` | Save your settings (theme, sensitivity, domain lists) |
+| `activeTab` | Allow manual "Scan This Page" from the popup |
 
-### Risk Level Calculation
+### Why `<all_urls>` Content Script?
 
-The risk level is determined by the total score and sensitivity setting:
-
-| Sensitivity | High Risk Threshold | Medium Risk Threshold |
-|-------------|--------------------|-----------------------|
-| Strict      | ≥ 15               | ≥ 8                   |
-| Normal      | ≥ 25               | ≥ 12                  |
-| Lenient     | ≥ 40               | ≥ 20                  |
-
-Additionally, any **critical pattern** (e.g., binding arbitration + class action waiver) immediately triggers a **High Risk** rating regardless of score.
-
-### Match Capping
-
-To prevent score inflation from repetitive text:
-- Maximum 5 matches per pattern per page
-- Matches are deduplicated by text node to avoid double-counting
+The content script runs on all URLs to detect legal pages automatically. However:
+- **Gated execution**: Only runs based on your settings
+- **Default behavior**: Only scans pages detected as legal documents
+- **User control**: Configure with allowlist/denylist
+- **No data exfiltration**: Nothing ever leaves your browser
 
 ## Installation
 
+### Chrome Web Store (Recommended)
+
+Coming soon - [Chrome Web Store Link](#)
+
 ### From Source
 
-1. **Clone or download** this repository
-
-2. **Install dependencies**:
+1. **Clone the repository:**
    ```bash
+   git clone https://github.com/amoddhopavkar2/ClauseGuard.git
    cd ClauseGuard
+   ```
+
+2. **Install dependencies:**
+   ```bash
    npm install
    ```
 
-3. **Build the extension**:
+3. **Build the extension:**
    ```bash
    npm run build
    ```
 
-4. **Load in Chrome**:
-   - Open Chrome and navigate to `chrome://extensions/`
+4. **Load in Chrome:**
+   - Open `chrome://extensions/`
    - Enable "Developer mode" (toggle in top right)
    - Click "Load unpacked"
    - Select the `dist` folder
 
-### Development
-
-For development with auto-rebuild:
-```bash
-npm run watch
-```
-
-Then reload the extension in Chrome after making changes.
-
-## Usage
-
-### Automatic Scanning
-
-When you visit a page that appears to be a Terms of Service or Privacy Policy (based on URL keywords or page title), ClauseGuard will automatically:
-1. Scan the page content for risky clauses
-2. Highlight detected patterns with color-coded marks
-3. Display a summary panel on the right side
-
-### Manual Scanning
-
-Click the ClauseGuard icon in your browser toolbar to:
-- Toggle the extension for the current domain
-- Manually trigger a scan with "Scan This Page"
-- View the last scan results
-
-### Interacting with Results
-
-- **Click any highlight** on the page to open the panel and focus that excerpt
-- **Click an excerpt** in the panel to scroll to and flash the highlight
-- **Rescan** using the refresh button in the panel header
-- **Close** the panel with the × button (highlights remain visible)
-
 ## Configuration
 
-Access the Options page via the popup or `chrome://extensions`:
+Access settings via the popup (gear icon) or `chrome://extensions` → ClauseGuard → Options.
+
+### Appearance
+
+| Setting | Options | Description |
+|---------|---------|-------------|
+| Theme | System (default), Light, Dark | Controls panel and UI appearance |
 
 ### General Settings
 
-- **Enable ClauseGuard**: Global on/off toggle
-- **Only scan legal pages**: When enabled, only auto-scans pages detected as legal documents
-- **Sensitivity**: Adjust risk thresholds (Strict / Normal / Lenient)
+| Setting | Default | Description |
+|---------|---------|-------------|
+| Enable ClauseGuard | On | Global on/off toggle |
+| Only scan legal pages | On | Auto-scan only Terms/Privacy pages |
+| Sensitivity | Normal | Strict/Normal/Lenient risk thresholds |
+
+### Sensitivity Thresholds
+
+| Sensitivity | High Risk | Medium Risk |
+|-------------|-----------|-------------|
+| Strict | ≥ 15 | ≥ 8 |
+| Normal | ≥ 25 | ≥ 12 |
+| Lenient | ≥ 40 | ≥ 20 |
+
+### Domain Lists
+
+- **Allowlist**: Always scan pages on these domains
+- **Denylist**: Never scan pages on these domains
+- Supports wildcards: `*.example.com`
 
 ### Highlight Colors
 
 Customize the highlight color for each category to suit your preference.
 
-### Domain Lists
+## Usage
 
-- **Allowlist**: Always scan pages on these domains (even when "only legal pages" is enabled)
-- **Denylist**: Never scan pages on these domains
+### Automatic Scanning
 
-Supports wildcard domains like `*.example.com`.
+When you visit a page detected as a legal document, ClauseGuard will:
+1. Scan the page content
+2. Highlight detected patterns
+3. Display a summary panel
 
-## Technical Details
+### Manual Scanning
 
-### Architecture
+1. Click the ClauseGuard icon in your toolbar
+2. Click "Scan This Page"
+3. View results in the panel
+
+### Interacting with Results
+
+- **Click a highlight** on the page to focus it in the panel
+- **Click an excerpt** in the panel to scroll to that highlight
+- **Rescan** using the ↻ button
+- **Close** the panel with × (highlights remain visible)
+
+## Limitations & Disclaimer
+
+**ClauseGuard is NOT a substitute for legal advice.**
+
+- Detection is based on pattern matching heuristics
+- False positives and false negatives are possible
+- Context and nuance may be missed
+- Legal implications vary by jurisdiction
+- Always read important documents carefully
+- Consult a lawyer for significant legal decisions
+
+## Development
+
+### Setup
+
+```bash
+npm install
+npm run build    # Production build
+npm run watch    # Development with auto-rebuild
+npm run lint     # Run ESLint
+npm run format   # Format with Prettier
+```
+
+### Project Structure
 
 ```
 src/
-├── background/
-│   └── serviceWorker.ts   # Message handling, tab state management
-├── content/
-│   ├── contentScript.ts   # Main entry, page detection, scanning
-│   ├── highlighter.ts     # DOM manipulation, text wrapping
-│   ├── panel.ts           # Shadow DOM panel UI
-│   └── styles.css         # Highlight styles
-├── shared/
-│   ├── types.ts           # TypeScript types
-│   ├── patterns.ts        # Clause detection patterns
-│   └── utils.ts           # Shared utilities
-├── popup/
-│   └── ...                # Extension popup UI
-├── options/
-│   └── ...                # Settings page
+├── background/          # Service worker
+│   └── serviceWorker.ts
+├── content/             # Content scripts
+│   ├── contentScript.ts # Main entry, scanning logic
+│   ├── highlighter.ts   # DOM manipulation
+│   ├── panel.ts         # Results panel (Shadow DOM)
+│   └── styles.css       # Highlight styles
+├── shared/              # Shared code
+│   ├── types.ts         # TypeScript types
+│   ├── patterns.ts      # Detection patterns
+│   └── utils.ts         # Utilities
+├── popup/               # Extension popup
+│   └── ...
+├── options/             # Settings page
+│   └── ...
+├── assets/              # Icons
 └── manifest.json
 ```
 
-### Performance
+### Adding Patterns
 
-- **Non-blocking scanning**: Uses `requestIdleCallback` (with setTimeout fallback) to process text nodes in batches
-- **Efficient DOM traversal**: TreeWalker API for text node selection
-- **Shadow DOM isolation**: Panel styles don't affect or get affected by host page
-- **Minimal reflows**: Highlights are applied in batches with position-based sorting
+See [CONTRIBUTING.md](CONTRIBUTING.md) for how to add new detection patterns.
 
-### Permissions
+## Manual Test Plan
 
-Minimal permissions required:
-- `storage`: Save user settings
-- `activeTab`: Scan current tab on user request
+Before release, test on:
 
-Content script runs on `<all_urls>` but gates execution based on:
-1. User's enabled setting
-2. Domain allow/deny lists
-3. Legal page detection (if setting enabled)
+- [ ] Long Terms page (Google, Amazon, Uber)
+- [ ] Privacy Policy (Facebook, TikTok)
+- [ ] Non-legal page (should not auto-scan)
+- [ ] SPA navigation (single-page app route changes)
+- [ ] Dark mode toggle (system, light, dark)
+- [ ] Settings persistence (reload, restart)
+- [ ] No console errors
+- [ ] No network requests (check DevTools Network tab)
+
+## Roadmap
+
+- [ ] More detection patterns
+- [ ] Export report functionality
+- [ ] Localization (i18n)
+- [ ] Firefox support
+- [ ] Pattern customization
 
 ## Browser Support
 
 - Chrome 100+
 - Edge 100+ (Chromium-based)
-- Other Chromium-based browsers with Manifest V3 support
+- Other Chromium browsers with Manifest V3 support
 
 ## License
 
-MIT License - See LICENSE file for details.
+[MIT License](LICENSE) - See LICENSE file for details.
 
-## Disclaimer
+## Contributing
 
-ClauseGuard is a tool to help highlight potentially concerning clauses in legal documents. It is not a substitute for professional legal advice. The patterns and risk assessments are heuristics and may not capture all relevant issues or context. Always read legal documents carefully and consult a lawyer for important decisions.
+Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+## Security
+
+See [SECURITY.md](SECURITY.md) for reporting vulnerabilities.
+
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) for version history.

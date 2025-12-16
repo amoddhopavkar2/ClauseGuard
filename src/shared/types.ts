@@ -22,6 +22,9 @@ export type RiskLevel = 'low' | 'medium' | 'high';
 // Sensitivity settings
 export type Sensitivity = 'strict' | 'normal' | 'lenient';
 
+// Theme settings
+export type Theme = 'system' | 'light' | 'dark';
+
 // A single pattern definition
 export interface ClausePattern {
   id: string;
@@ -71,6 +74,8 @@ export interface UserSettings {
   onlyLegalPages: boolean;
   // Sensitivity level affects thresholds
   sensitivity: Sensitivity;
+  // Theme setting (system follows OS, light, dark)
+  theme: Theme;
   // Custom highlight colors per category
   highlightColors: Record<ClauseCategory, string>;
   // Domains to always scan
@@ -88,6 +93,7 @@ export const DEFAULT_SETTINGS: UserSettings = {
   enabled: true,
   onlyLegalPages: true,
   sensitivity: 'normal',
+  theme: 'system',
   highlightColors: {
     'arbitration': '#ff6b6b',
     'auto-renew': '#ffa94d',

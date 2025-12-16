@@ -1,6 +1,7 @@
 /**
  * ClauseGuard Content Script Styles
  * Styles for inline highlights
+ * Theme-aware with good contrast for accessibility
  */
 
 /* Highlight base styles */
@@ -9,10 +10,14 @@
   border-radius: 2px;
   cursor: pointer;
   transition: background-color 0.2s ease, box-shadow 0.2s ease;
+  /* Ensure text is readable on highlight backgrounds */
+  color: #1a1a1a !important;
+  -webkit-text-fill-color: #1a1a1a !important;
+  text-decoration: none !important;
 }
 
 .cg-highlight:hover {
-  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.15);
 }
 
 /* Active/flashing highlight */
@@ -29,52 +34,46 @@
   }
 }
 
-/* Category-specific colors (can be overridden by inline styles) */
+/* Category-specific colors
+ * These colors are chosen for good contrast with dark text
+ * All have WCAG AA compliant contrast ratios
+ */
 .cg-cat-arbitration {
   background-color: #ff6b6b !important;
-  color: #000 !important;
 }
 
 .cg-cat-auto-renew {
   background-color: #ffa94d !important;
-  color: #000 !important;
 }
 
 .cg-cat-data-sharing {
   background-color: #ff8787 !important;
-  color: #000 !important;
 }
 
 .cg-cat-data-retention {
   background-color: #ffd43b !important;
-  color: #000 !important;
 }
 
 .cg-cat-unilateral-changes {
   background-color: #69db7c !important;
-  color: #000 !important;
 }
 
 .cg-cat-liability {
   background-color: #74c0fc !important;
-  color: #000 !important;
 }
 
 .cg-cat-governing-law {
   background-color: #b197fc !important;
-  color: #000 !important;
 }
 
-/* Ensure highlights are visible regardless of page theme */
-.cg-highlight {
-  -webkit-text-fill-color: inherit;
-  text-decoration: none !important;
-}
-
-/* Dark mode adjustments */
+/* Dark mode adjustments for better visibility */
 @media (prefers-color-scheme: dark) {
   .cg-highlight {
-    color: #1a1a1a !important;
-    -webkit-text-fill-color: #1a1a1a !important;
+    /* Slightly adjust colors for dark backgrounds */
+    filter: brightness(0.95) saturate(1.1);
+  }
+
+  .cg-highlight:hover {
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2);
   }
 }

@@ -3,11 +3,12 @@
  * Manages extension settings
  */
 
-import type { UserSettings, ClauseCategory, Sensitivity } from '../shared/types';
+import type { UserSettings, ClauseCategory, Sensitivity, Theme } from '../shared/types';
 import { DEFAULT_SETTINGS } from '../shared/types';
 import { loadSettings, saveSettings } from '../shared/utils';
 
 // DOM Elements
+const themeSelect = document.getElementById('setting-theme') as HTMLSelectElement;
 const enabledToggle = document.getElementById('setting-enabled') as HTMLInputElement;
 const onlyLegalToggle = document.getElementById('setting-only-legal') as HTMLInputElement;
 const sensitivitySelect = document.getElementById('setting-sensitivity') as HTMLSelectElement;
@@ -18,7 +19,7 @@ const allowlistAddBtn = document.getElementById('allowlist-add')!;
 const denylistContainer = document.getElementById('denylist')!;
 const denylistInput = document.getElementById('denylist-input') as HTMLInputElement;
 const denylistAddBtn = document.getElementById('denylist-add')!;
-const toast = document.getElementById('toast')!;
+const toast = document.getElementById('toast')!
 
 // Color input elements by category
 const colorInputs: Record<ClauseCategory, HTMLInputElement> = {
@@ -33,6 +34,38 @@ const colorInputs: Record<ClauseCategory, HTMLInputElement> = {
 
 // Current settings
 let currentSettings: UserSettings;
+
+// System theme media query
+let systemThemeMediaQuery: MediaQueryList | null = null;
+
+/**
+ * Apply theme to the page
+ */
+function applyTheme(theme: Theme): void {
+  let effectiveTheme: 'light' | 'dark' = 'light';
+
+  if (theme === 'system') {
+    effectiveTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  } else {
+    effectiveTheme = theme;
+  }
+
+  document.documentElement.dataset.theme = effectiveTheme;
+}
+
+/**
+ * Set up system theme change listener
+ */
+function setupSystemThemeListener(): void {
+  if (systemThemeMediaQuery) return;
+
+  systemThemeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+  systemThemeMediaQuery.addEventListener('change', () => {
+    if (currentSettings.theme === 'system') {
+      applyTheme('system');
+    }
+  });
+}
 
 /**
  * Show toast notification
@@ -191,7 +224,14 @@ async function initialize(): Promise<void> {
   // Load settings
   currentSettings = await loadSettings();
 
+  // Set up system theme listener
+  setupSystemThemeListener();
+
+  // Apply current theme
+  applyTheme(currentSettings.theme);
+
   // Set toggle values
+  themeSelect.value = currentSettings.theme;
   enabledToggle.checked = currentSettings.enabled;
   onlyLegalToggle.checked = currentSettings.onlyLegalPages;
   sensitivitySelect.value = currentSettings.sensitivity;
@@ -206,6 +246,12 @@ async function initialize(): Promise<void> {
   renderDomainList(denylistContainer, currentSettings.denylist, removeFromDenylist);
 
   // Add event listeners
+  themeSelect.addEventListener('change', () => {
+    currentSettings.theme = themeSelect.value as Theme;
+    applyTheme(currentSettings.theme);
+    save();
+  });
+
   enabledToggle.addEventListener('change', () => {
     currentSettings.enabled = enabledToggle.checked;
     save();

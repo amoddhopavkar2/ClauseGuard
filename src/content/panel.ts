@@ -2,19 +2,22 @@
  * ClauseGuard Panel
  * Right-side floating panel showing scan results
  * Uses Shadow DOM to isolate styles from the host page
+ * Supports light/dark themes with system preference detection
  */
 
-import type { ScanResult, ClauseMatch, ClauseCategory, RiskLevel, UserSettings } from '../shared/types';
+import type { ScanResult, ClauseMatch, ClauseCategory, RiskLevel, UserSettings, Theme } from '../shared/types';
 import { CATEGORY_INFO, SEVERITY_INFO } from '../shared/types';
 import { scrollToHighlight } from './highlighter';
-import { escapeHtml, truncate } from '../shared/utils';
+import { escapeHtml } from '../shared/utils';
 
 // Panel container reference
 let panelRoot: HTMLElement | null = null;
 let shadowRoot: ShadowRoot | null = null;
+let currentTheme: Theme = 'system';
+let systemThemeMediaQuery: MediaQueryList | null = null;
 
 /**
- * Panel CSS styles
+ * Panel CSS styles with CSS variables for theming
  */
 const PANEL_STYLES = `
   :host {
@@ -26,22 +29,76 @@ const PANEL_STYLES = `
     box-sizing: border-box;
   }
 
+  /* CSS Variables - Light Theme (default) */
+  .cg-panel {
+    --cg-bg-primary: #ffffff;
+    --cg-bg-secondary: #f8f9fa;
+    --cg-bg-tertiary: #e9ecef;
+    --cg-bg-hover: #dee2e6;
+    --cg-text-primary: #1a1a1a;
+    --cg-text-secondary: #495057;
+    --cg-text-muted: #868e96;
+    --cg-border: #e9ecef;
+    --cg-shadow: rgba(0, 0, 0, 0.15);
+    --cg-shadow-light: rgba(0, 0, 0, 0.1);
+    --cg-excerpt-match-bg: rgba(255, 235, 59, 0.4);
+    --cg-scrollbar-thumb: #ced4da;
+    --cg-scrollbar-thumb-hover: #adb5bd;
+  }
+
+  /* Dark Theme */
+  .cg-panel[data-cg-theme="dark"] {
+    --cg-bg-primary: #1e1e1e;
+    --cg-bg-secondary: #252526;
+    --cg-bg-tertiary: #333333;
+    --cg-bg-hover: #3c3c3c;
+    --cg-text-primary: #e4e4e4;
+    --cg-text-secondary: #cccccc;
+    --cg-text-muted: #9d9d9d;
+    --cg-border: #404040;
+    --cg-shadow: rgba(0, 0, 0, 0.4);
+    --cg-shadow-light: rgba(0, 0, 0, 0.3);
+    --cg-excerpt-match-bg: rgba(255, 235, 59, 0.25);
+    --cg-scrollbar-thumb: #555555;
+    --cg-scrollbar-thumb-hover: #666666;
+  }
+
+  /* System Theme - uses prefers-color-scheme */
+  @media (prefers-color-scheme: dark) {
+    .cg-panel[data-cg-theme="system"] {
+      --cg-bg-primary: #1e1e1e;
+      --cg-bg-secondary: #252526;
+      --cg-bg-tertiary: #333333;
+      --cg-bg-hover: #3c3c3c;
+      --cg-text-primary: #e4e4e4;
+      --cg-text-secondary: #cccccc;
+      --cg-text-muted: #9d9d9d;
+      --cg-border: #404040;
+      --cg-shadow: rgba(0, 0, 0, 0.4);
+      --cg-shadow-light: rgba(0, 0, 0, 0.3);
+      --cg-excerpt-match-bg: rgba(255, 235, 59, 0.25);
+      --cg-scrollbar-thumb: #555555;
+      --cg-scrollbar-thumb-hover: #666666;
+    }
+  }
+
   .cg-panel {
     position: fixed;
     top: 20px;
     right: 20px;
     width: 360px;
     max-height: calc(100vh - 40px);
-    background: #ffffff;
+    background: var(--cg-bg-primary);
     border-radius: 12px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15), 0 2px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 8px 32px var(--cg-shadow), 0 2px 8px var(--cg-shadow-light);
     z-index: 2147483647;
     display: flex;
     flex-direction: column;
     overflow: hidden;
     font-size: 14px;
     line-height: 1.5;
-    color: #1a1a1a;
+    color: var(--cg-text-primary);
+    border: 1px solid var(--cg-border);
   }
 
   .cg-panel.collapsed {
@@ -134,8 +191,8 @@ const PANEL_STYLES = `
 
   .cg-summary {
     padding: 12px 16px;
-    background: #f8f9fa;
-    border-bottom: 1px solid #e9ecef;
+    background: var(--cg-bg-secondary);
+    border-bottom: 1px solid var(--cg-border);
     flex-shrink: 0;
   }
 
@@ -144,7 +201,7 @@ const PANEL_STYLES = `
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    color: #868e96;
+    color: var(--cg-text-muted);
     margin-bottom: 8px;
   }
 
@@ -159,8 +216,8 @@ const PANEL_STYLES = `
     align-items: center;
     gap: 4px;
     padding: 4px 8px;
-    background: white;
-    border: 1px solid #e9ecef;
+    background: var(--cg-bg-primary);
+    border: 1px solid var(--cg-border);
     border-radius: 6px;
     font-size: 12px;
   }
@@ -171,7 +228,7 @@ const PANEL_STYLES = `
 
   .cg-category-count {
     font-weight: 600;
-    color: #495057;
+    color: var(--cg-text-secondary);
   }
 
   .cg-excerpts {
@@ -182,7 +239,7 @@ const PANEL_STYLES = `
 
   .cg-excerpt-item {
     padding: 10px 12px;
-    background: #f8f9fa;
+    background: var(--cg-bg-secondary);
     border-radius: 8px;
     margin-bottom: 8px;
     cursor: pointer;
@@ -191,7 +248,7 @@ const PANEL_STYLES = `
   }
 
   .cg-excerpt-item:hover {
-    background: #e9ecef;
+    background: var(--cg-bg-tertiary);
     transform: translateX(2px);
   }
 
@@ -214,6 +271,7 @@ const PANEL_STYLES = `
     display: flex;
     align-items: center;
     gap: 4px;
+    color: var(--cg-text-secondary);
   }
 
   .cg-excerpt-severity {
@@ -245,16 +303,17 @@ const PANEL_STYLES = `
 
   .cg-excerpt-text {
     font-size: 12px;
-    color: #495057;
+    color: var(--cg-text-secondary);
     line-height: 1.6;
     word-break: break-word;
   }
 
   .cg-excerpt-match {
-    background: rgba(255, 235, 59, 0.4);
+    background: var(--cg-excerpt-match-bg);
     padding: 0 2px;
     border-radius: 2px;
     font-weight: 500;
+    color: var(--cg-text-primary);
   }
 
   .cg-progress {
@@ -264,7 +323,7 @@ const PANEL_STYLES = `
 
   .cg-progress-bar {
     height: 4px;
-    background: #e9ecef;
+    background: var(--cg-bg-tertiary);
     border-radius: 2px;
     overflow: hidden;
     margin-bottom: 8px;
@@ -278,13 +337,13 @@ const PANEL_STYLES = `
 
   .cg-progress-text {
     font-size: 12px;
-    color: #868e96;
+    color: var(--cg-text-muted);
   }
 
   .cg-empty {
     padding: 24px 16px;
     text-align: center;
-    color: #868e96;
+    color: var(--cg-text-muted);
   }
 
   .cg-empty-icon {
@@ -298,17 +357,17 @@ const PANEL_STYLES = `
 
   .cg-footer {
     padding: 10px 16px;
-    background: #f8f9fa;
-    border-top: 1px solid #e9ecef;
+    background: var(--cg-bg-secondary);
+    border-top: 1px solid var(--cg-border);
     font-size: 11px;
-    color: #868e96;
+    color: var(--cg-text-muted);
     text-align: center;
     flex-shrink: 0;
   }
 
   .cg-score {
     font-weight: 600;
-    color: #495057;
+    color: var(--cg-text-secondary);
   }
 
   /* Scrollbar styling */
@@ -321,12 +380,12 @@ const PANEL_STYLES = `
   }
 
   .cg-excerpts::-webkit-scrollbar-thumb {
-    background: #ced4da;
+    background: var(--cg-scrollbar-thumb);
     border-radius: 3px;
   }
 
   .cg-excerpts::-webkit-scrollbar-thumb:hover {
-    background: #adb5bd;
+    background: var(--cg-scrollbar-thumb-hover);
   }
 `;
 
@@ -373,7 +432,7 @@ function renderCategoryCounts(counts: Record<ClauseCategory, number>): string {
     })
     .join('');
 
-  return categories || '<span style="color: #868e96; font-size: 12px;">No issues found</span>';
+  return categories || '<span style="font-size: 12px;">No issues found</span>';
 }
 
 /**
@@ -458,14 +517,22 @@ function renderProgress(percentage: number): string {
 }
 
 /**
+ * Get theme attribute value based on current settings
+ */
+function getThemeAttribute(theme: Theme): string {
+  return theme;
+}
+
+/**
  * Render the full panel content
  */
 function renderPanel(result: ScanResult | null, settings: UserSettings, isScanning: boolean = false): string {
   const riskLevel = result?.riskLevel || 'low';
   const riskClass = getRiskClass(riskLevel);
+  const themeAttr = getThemeAttribute(settings.theme);
 
   return `
-    <div class="cg-panel" id="cg-panel-container">
+    <div class="cg-panel" id="cg-panel-container" data-cg-theme="${themeAttr}">
       <div class="cg-header">
         <div class="cg-header-left">
           <span class="cg-logo">ClauseGuard</span>
@@ -506,6 +573,35 @@ function renderPanel(result: ScanResult | null, settings: UserSettings, isScanni
 }
 
 /**
+ * Update panel theme
+ */
+export function updatePanelTheme(theme: Theme): void {
+  currentTheme = theme;
+  if (!shadowRoot) return;
+
+  const panelContainer = shadowRoot.getElementById('cg-panel-container');
+  if (panelContainer) {
+    panelContainer.dataset.cgTheme = theme;
+  }
+}
+
+/**
+ * Set up system theme change listener
+ */
+function setupSystemThemeListener(): void {
+  if (systemThemeMediaQuery) return;
+
+  systemThemeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+
+  // The CSS handles this automatically via @media query for system theme,
+  // but we need to trigger re-renders if any JavaScript-controlled styles change
+  systemThemeMediaQuery.addEventListener('change', () => {
+    // Panel CSS variables handle this automatically via @media query
+    // This listener is here for any additional JavaScript-side updates if needed
+  });
+}
+
+/**
  * Show the panel
  */
 export function showPanel(
@@ -518,6 +614,11 @@ export function showPanel(
 ): void {
   createPanelContainer();
   if (!shadowRoot) return;
+
+  currentTheme = settings.theme;
+
+  // Set up system theme listener
+  setupSystemThemeListener();
 
   // Clear existing content (except styles)
   const styleEl = shadowRoot.querySelector('style');
@@ -591,6 +692,8 @@ export function showScanning(settings: UserSettings): void {
   createPanelContainer();
   if (!shadowRoot) return;
 
+  currentTheme = settings.theme;
+
   const styleEl = shadowRoot.querySelector('style');
   shadowRoot.innerHTML = '';
   if (styleEl) {
@@ -629,7 +732,7 @@ export function focusExcerpt(matchId: string): void {
   const excerptItem = shadowRoot.querySelector(`[data-match-id="${matchId}"]`) as HTMLElement;
   if (excerptItem) {
     excerptItem.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    excerptItem.style.background = '#dee2e6';
+    excerptItem.style.background = 'var(--cg-bg-hover)';
     setTimeout(() => {
       excerptItem.style.background = '';
     }, 1500);

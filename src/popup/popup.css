@@ -1,6 +1,35 @@
 /**
  * ClauseGuard Popup Styles
+ * Supports light and dark themes
  */
+
+/* CSS Variables - Light Theme (default) */
+:root {
+  --cg-bg-primary: #ffffff;
+  --cg-bg-secondary: #f8f9fa;
+  --cg-bg-tertiary: #e9ecef;
+  --cg-bg-hover: #dee2e6;
+  --cg-text-primary: #1a1a1a;
+  --cg-text-secondary: #495057;
+  --cg-text-muted: #868e96;
+  --cg-border: #e9ecef;
+  --cg-border-input: #ced4da;
+  --cg-toggle-bg: #ced4da;
+}
+
+/* Dark Theme */
+[data-theme="dark"] {
+  --cg-bg-primary: #252526;
+  --cg-bg-secondary: #2d2d2d;
+  --cg-bg-tertiary: #333333;
+  --cg-bg-hover: #3c3c3c;
+  --cg-text-primary: #e4e4e4;
+  --cg-text-secondary: #cccccc;
+  --cg-text-muted: #9d9d9d;
+  --cg-border: #404040;
+  --cg-border-input: #555555;
+  --cg-toggle-bg: #555555;
+}
 
 * {
   box-sizing: border-box;
@@ -12,9 +41,10 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
   font-size: 14px;
   line-height: 1.5;
-  color: #1a1a1a;
-  background: #ffffff;
+  color: var(--cg-text-primary);
+  background: var(--cg-bg-primary);
   width: 320px;
+  transition: background-color 0.2s, color 0.2s;
 }
 
 .popup-container {
@@ -70,13 +100,13 @@ body {
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #868e96;
+  color: var(--cg-text-muted);
 }
 
 .spinner {
   width: 16px;
   height: 16px;
-  border: 2px solid #e9ecef;
+  border: 2px solid var(--cg-border);
   border-top-color: #667eea;
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
@@ -91,7 +121,7 @@ body {
   align-items: center;
   gap: 8px;
   padding: 10px 12px;
-  background: #f8f9fa;
+  background: var(--cg-bg-secondary);
   border-radius: 8px;
   font-size: 13px;
 }
@@ -116,7 +146,7 @@ body {
   align-items: center;
   justify-content: space-between;
   padding: 10px 12px;
-  background: #f8f9fa;
+  background: var(--cg-bg-secondary);
   border-radius: 8px;
 }
 
@@ -130,13 +160,13 @@ body {
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  color: #868e96;
+  color: var(--cg-text-muted);
 }
 
 .domain-name {
   font-size: 13px;
   font-weight: 600;
-  color: #495057;
+  color: var(--cg-text-secondary);
   max-width: 180px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -164,7 +194,7 @@ body {
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: #ced4da;
+  background-color: var(--cg-toggle-bg);
   transition: 0.3s;
   border-radius: 24px;
 }
@@ -241,7 +271,7 @@ body {
 /* Results Section */
 .results-section {
   padding: 12px;
-  background: #f8f9fa;
+  background: var(--cg-bg-secondary);
   border-radius: 8px;
 }
 
@@ -257,7 +287,7 @@ body {
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  color: #868e96;
+  color: var(--cg-text-muted);
 }
 
 .risk-badge {
@@ -295,7 +325,7 @@ body {
   align-items: center;
   gap: 4px;
   padding: 4px 8px;
-  background: white;
+  background: var(--cg-bg-primary);
   border-radius: 6px;
   font-size: 12px;
 }
@@ -306,7 +336,7 @@ body {
 
 .count-value {
   font-weight: 600;
-  color: #495057;
+  color: var(--cg-text-secondary);
 }
 
 /* Legal Page Indicator */
@@ -325,6 +355,31 @@ body {
   font-size: 14px;
 }
 
+/* Theme Section */
+.theme-section {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  background: var(--cg-bg-secondary);
+  border-top: 1px solid var(--cg-border);
+}
+
+.theme-label {
+  font-size: 12px;
+  color: var(--cg-text-muted);
+}
+
+.theme-select {
+  padding: 4px 8px;
+  border: 1px solid var(--cg-border-input);
+  border-radius: 4px;
+  font-size: 12px;
+  background: var(--cg-bg-primary);
+  color: var(--cg-text-secondary);
+  cursor: pointer;
+}
+
 /* Footer */
 .popup-footer {
   display: flex;
@@ -332,10 +387,10 @@ body {
   justify-content: center;
   gap: 8px;
   padding: 10px 16px;
-  background: #f8f9fa;
-  border-top: 1px solid #e9ecef;
+  background: var(--cg-bg-secondary);
+  border-top: 1px solid var(--cg-border);
   font-size: 12px;
-  color: #868e96;
+  color: var(--cg-text-muted);
 }
 
 .footer-link {
@@ -356,9 +411,9 @@ body {
 }
 
 .footer-divider {
-  color: #ced4da;
+  color: var(--cg-border-input);
 }
 
 .footer-version {
-  color: #adb5bd;
+  color: var(--cg-text-muted);
 }

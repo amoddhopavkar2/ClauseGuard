@@ -7,11 +7,34 @@
   "scripts": {
     "build": "node build.js",
     "watch": "node build.js --watch",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist",
+    "lint": "eslint src --ext .ts",
+    "lint:fix": "eslint src --ext .ts --fix",
+    "format": "prettier --write \"src/**/*.{ts,css,html,json}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,css,html,json}\"",
+    "typecheck": "tsc --noEmit",
+    "prebuild": "npm run typecheck"
   },
   "devDependencies": {
     "@types/chrome": "^0.0.260",
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0",
     "esbuild": "^0.20.0",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.0",
     "typescript": "^5.3.3"
-  }
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/amoddhopavkar2/ClauseGuard.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/amoddhopavkar2/ClauseGuard/issues"
+  },
+  "homepage": "https://github.com/amoddhopavkar2/ClauseGuard#readme"
 }

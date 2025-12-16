@@ -3,9 +3,9 @@
  * Handles popup UI interactions
  */
 
-import type { ScanResult, UserSettings, ClauseCategory } from '../shared/types';
+import type { ScanResult, UserSettings, ClauseCategory, Theme } from '../shared/types';
 import { CATEGORY_INFO } from '../shared/types';
-import { loadSettings, getDomain } from '../shared/utils';
+import { loadSettings, saveSettings, getDomain } from '../shared/utils';
 
 // DOM Elements
 const statusSection = document.getElementById('status-section')!;
@@ -17,11 +17,39 @@ const resultsSection = document.getElementById('results-section')!;
 const resultsCounts = document.getElementById('results-counts')!;
 const riskBadge = document.getElementById('risk-badge')!;
 const legalIndicator = document.getElementById('legal-indicator')!;
+const themeSelect = document.getElementById('theme-select') as HTMLSelectElement;
 const optionsLink = document.getElementById('options-link')!;
 
 // State
 let currentDomain = '';
 let settings: UserSettings;
+
+/**
+ * Apply theme to the popup
+ */
+function applyTheme(theme: Theme): void {
+  let effectiveTheme: 'light' | 'dark' = 'light';
+
+  if (theme === 'system') {
+    effectiveTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  } else {
+    effectiveTheme = theme;
+  }
+
+  document.documentElement.dataset.theme = effectiveTheme;
+}
+
+/**
+ * Set up system theme change listener
+ */
+function setupSystemThemeListener(): void {
+  const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+  mediaQuery.addEventListener('change', () => {
+    if (settings.theme === 'system') {
+      applyTheme('system');
+    }
+  });
+}
 
 /**
  * Get the active tab
@@ -94,6 +122,16 @@ function displayResults(result: ScanResult): void {
 }
 
 /**
+ * Handle theme change
+ */
+async function handleThemeChange(): Promise<void> {
+  const theme = themeSelect.value as Theme;
+  settings.theme = theme;
+  applyTheme(theme);
+  await saveSettings({ theme });
+}
+
+/**
  * Initialize popup
  */
 async function initialize(): Promise<void> {
@@ -102,6 +140,11 @@ async function initialize(): Promise<void> {
   try {
     // Load settings
     settings = await loadSettings();
+
+    // Set up theme
+    setupSystemThemeListener();
+    applyTheme(settings.theme);
+    themeSelect.value = settings.theme;
 
     // Get active tab
     const tab = await getActiveTab();
@@ -232,6 +275,7 @@ function openOptions(event: Event): void {
 // Event listeners
 scanBtn.addEventListener('click', handleScan);
 domainToggle.addEventListener('change', handleDomainToggle);
+themeSelect.addEventListener('change', handleThemeChange);
 optionsLink.addEventListener('click', openOptions);
 
 // Initialize on load
